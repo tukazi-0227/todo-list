@@ -12,26 +12,89 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import Task from '@/components/Task.vue';
 import CalendarComponent from '@/components/Calendar.vue';
 import Header from '@/components/Header.vue';
 import 'v-calendar/dist/style.css';
 
-const taskList = ref<{ name: string; date: Date }[]>([
-  { name: '仕事', date: new Date('2024-10-09') },
-  { name: '宿題', date: new Date('2024-10-10') },
-  { name: '買い物', date: new Date('2024-10-11') },
-  { name: '買い物', date: new Date('2024-10-12') },
-  { name: '読書', date: new Date('2024-10-13') },
-]);
+const taskList = ref<{ id: number; name: string; date: Date }[]>([]);
 
-const addTask = (task: {name: string, date: Date}) => {
-  taskList.value.push(task);
+// 全タスクを取得するapi関数
+const getTasks = async () => {
+  try {
+    const response = await fetch('/api/getTasks');
+    const data = await response.json();
+
+    //dataチェック
+    if (data.error) {
+      console.error(data.error);
+    } else {
+      taskList.value = data.map((task: { id: number, taskName: string, deadlineDate: string }) => ({
+        id: task.id,
+        name: task.taskName,
+        date: new Date(task.deadlineDate)
+      }));
+    }
+  } catch (error) {
+    console.error('タスクの取得に失敗しました', error);
+  }
+};
+
+// タスクを追加するapi関数
+const addTask = async (task: { name: string, date: Date }) => {
+  try {
+    const response = await fetch('/api/addTask', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        taskName: task.name,
+        deadlineDate: task.date.toISOString().split('T')[0],
+      }),
+    });
+    const data = await response.json();
+    console.log(data);
+    if (data.error) {
+      console.error(data.error);
+    } else {
+      taskList.value.push({
+        id: data.task.id,
+        name: data.task.taskName,
+        date: new Date(data.task.deadlineDate),
+      });
+    }
+  } catch (error) {
+    console.log('タスクの追加に失敗しました', error);
+  }
 }
 
-const deleteTask = (index: number) => {
-  taskList.value.splice(index, 1);
+const deleteTask = async (id: number) => {
+  try {
+    const response = await fetch('/api/deleteTask', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id }),
+    });
+
+    const data = await response.json();
+
+    // 該当idのデータ削除
+    if (data.error) {
+      console.error(data.error);
+    } else {
+      taskList.value = taskList.value.filter(task => task.id !== id);
+    }
+  } catch (error) {
+    console.error('タスクの削除に失敗しました', error);
+  }
 };
+
+// マウント時ににタスクを取得
+onMounted(getTasks);
 </script>
 
 <style scoped>

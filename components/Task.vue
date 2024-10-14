@@ -54,12 +54,12 @@ const isAddTask = ref(false);
 const additionalText = ref('');
 
 const props = defineProps<{
-    tasks: { name: string; date: Date }[],
+    tasks: { id: number; name: string; date: Date }[],
 }>();
 
 const emit = defineEmits<{
     (e: 'addTask', task: { name: string; date: Date }): void;
-    (e: 'deleteTask', index: number): void;
+    (e: 'deleteTask', id: number): void;
 }>();
 
 const handleClick = () => {
@@ -83,8 +83,11 @@ const addTask = () => {
 }
 
 const onDeleteTask = (index: number) => {
-    emit('deleteTask', index);
-}
+    const task = props.tasks[index];
+    if (task) {
+        emit('deleteTask', task.id);  // indexではなくtaskのidをemitする
+    }
+};
 
 const formattedTaskList = computed(() =>
     (props.tasks || []).map(task => ({
@@ -117,7 +120,7 @@ const formattedTaskList = computed(() =>
     top: 50px;
     left: 50px;
     z-index: 1000;
-    width: 500px;
+    width: 100%;
     height: 200px;
     background-color: white;
     border: 1px solid #ccc;

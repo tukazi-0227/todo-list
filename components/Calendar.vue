@@ -2,12 +2,15 @@
   <UCard class="calendar-card">
     <div class="flex space-x-2">
       <div class="calendar-container">
-        <v-calendar v-model="selectedDate" is-expanded :attributes="events" style="width: 400px; height: 300px;" @dayclick="handleDayClick" />
+        <v-calendar v-model="selectedDate" is-expanded :attributes="events" style="width: 400px; height: 300px;"
+          @dayclick="handleDayClick" />
       </div>
       <UCard class="calendar-container">
         <h2 class="title">タスク</h2>
         <div v-for="(task, index) in filteredTasks" :key="index" class="flex justify-center mb-2">
+          <UTooltip :text="task.detail" v-if="task.detail">
             <UButton class="todo-container">{{ task.name }}</UButton>
+          </UTooltip>
         </div>
       </UCard>
     </div>
@@ -22,7 +25,7 @@ import 'v-calendar/dist/style.css'
 const selectedDate = ref(new Date());
 
 const props = defineProps<{
-  tasks: { name: string; date: Date }[],
+  tasks: { name: string; detail: string; date: Date }[],
 }>();
 
 const events = computed(() => [
@@ -59,7 +62,7 @@ const filteredTasks = computed(() =>
 .calendar-container {
   display: block;
   width: 100%;
-  max-width: 100%;
+  max-width: 400px;
   margin: 0 auto;
 }
 </style>

@@ -1,14 +1,24 @@
 <template>
   <Header />
-  <div class="flex flex-col justify-center items-center h-screen space-y-1">
+  <div class="flex justify-center items-center h-screen space-y-1">
     <div class="flex space-x-20">
-      <Task :tasks="taskList" @addTask="addTask" @deleteTask="deleteTask" />
+      <Task :tasks="taskList" @addTask="addTask" @updateTask="updateTask" @deleteTask="deleteTask" />
       <div>
-        <h2 class="title">Calendar</h2>
+        <div class="flex justify-between items-center w-full">
+          <h2 class="title mx-auto">Calendar</h2>
+          <UTooltip>
+            <template #text>
+              <span style="color: blue;">●</span> タスクがある日
+              <span style="color: green;">●</span> 今日の日付
+            </template>
+            <UIcon name="i-heroicons-light-bulb" class="w-5 h-5" />
+          </UTooltip>
+        </div>
         <CalendarComponent :tasks="taskList" />
       </div>
     </div>
   </div>
+  <Footer />
 </template>
 
 <script setup lang="ts">
@@ -16,9 +26,10 @@ import { onMounted, ref } from 'vue';
 import Task from '@/components/Task.vue';
 import CalendarComponent from '@/components/Calendar.vue';
 import Header from '@/components/Header.vue';
+import Footer from '@/components/Footer.vue';
 import 'v-calendar/dist/style.css';
 
-const taskList = ref<{ id: number; name: string; date: Date }[]>([]);
+const taskList = ref<{ id: number; name: string; detail: string; date: Date }[]>([]);
 
 // 全タスクを取得するapi関数
 const getTasks = async () => {
@@ -30,9 +41,10 @@ const getTasks = async () => {
     if (data.error) {
       console.error(data.error);
     } else {
-      taskList.value = data.map((task: { id: number, taskName: string, deadlineDate: string }) => ({
+      taskList.value = data.map((task: { id: number, taskName: string, taskText: string, deadlineDate: string }) => ({
         id: task.id,
         name: task.taskName,
+        detail: task.taskText,
         date: new Date(task.deadlineDate)
       }));
     }
@@ -42,7 +54,7 @@ const getTasks = async () => {
 };
 
 // タスクを追加するapi関数
-const addTask = async (task: { name: string, date: Date }) => {
+const addTask = async (task: { name: string, detail: string, date: Date }) => {
   try {
     const response = await fetch('/api/addTask', {
       method: 'POST',
@@ -51,6 +63,7 @@ const addTask = async (task: { name: string, date: Date }) => {
       },
       body: JSON.stringify({
         taskName: task.name,
+        taskText: task.detail,
         deadlineDate: task.date.toISOString().split('T')[0],
       }),
     });
@@ -62,6 +75,7 @@ const addTask = async (task: { name: string, date: Date }) => {
       taskList.value.push({
         id: data.task.id,
         name: data.task.taskName,
+        detail: data.task.taskText,
         date: new Date(data.task.deadlineDate),
       });
     }
@@ -70,6 +84,42 @@ const addTask = async (task: { name: string, date: Date }) => {
   }
 }
 
+// タスクを更新するapi関数
+const updateTask = async (task: { id: number; name: string, detail: string, date: Date }) => {
+  try {
+    const response = await fetch('/api/updateTask', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: task.id,
+        taskName: task.name,
+        taskText: task.detail,
+        deadlineDate: task.date.toISOString().split('T')[0],
+      }),
+    });
+    const data = await response.json();
+    console.log(data);
+    if (data.error) {
+      console.error(data.error);
+    } else {
+      const index = taskList.value.findIndex(t => t.id === task.id);
+      if (index !== -1) {
+        taskList.value[index] = {
+          id: data.task.id,
+          name: data.task.taskName,
+          detail: data.task.taskText,
+          date: new Date(data.task.deadlineDate),
+        };
+      }
+    }
+  } catch (error) {
+    console.log('タスクの追加に失敗しました', error);
+  }
+}
+
+// タスクを削除するapi
 const deleteTask = async (id: number) => {
   try {
     const response = await fetch('/api/deleteTask', {
@@ -104,14 +154,6 @@ onMounted(getTasks);
   font-weight: bold;
   color: #06a01d;
   text-align: center;
-  padding: 10px;
-}
-
-.todo-card {
-  width: 400px;
-  height: 300px;
-  overflow-y: auto;
-  border: 5px solid #06a01d;
   padding: 10px;
 }
 </style>

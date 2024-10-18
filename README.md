@@ -2,19 +2,16 @@
 このアプリではタスクを日付ごとに追加でき、カレンダーを利用して分かりやすく管理できます。
 
 ## Setup
-このプロジェクトでは「yarn」(https://yarnpkg.com/)を使用して依存関係を管理していますが、「npm」も使用できます。推奨は「yarn」で、以下の手順でセットアップを行ってください。
+このプロジェクトでは「yarn」を使用して依存関係を管理していますが、「npm」も使用できます。推奨は「yarn」で、以下の手順でセットアップを行ってください。
+# yarn公式ページ
+(https://yarnpkg.com/)
 
 # npm
 npm install
 
-# pnpm
-pnpm install
-
 # yarn
 yarn install
 
-# bun
-bun install
 ```
 
 ## Development Server

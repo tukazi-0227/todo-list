@@ -3,14 +3,14 @@
 
 ## Setup
 このプロジェクトでは「yarn」を使用して依存関係を管理していますが、「npm」も使用できます。推奨は「yarn」で、以下の手順でセットアップを行ってください。
-# yarn公式ページ
+### yarn公式ページ
 (https://yarnpkg.com/)
-
-# npm
+### yarn
+yarn install
+### npm
 npm install
 
-# yarn
-yarn install
+
 
 ```
 

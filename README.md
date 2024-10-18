@@ -1,12 +1,9 @@
-# Nuxt 3 Minimal Starter
-
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+# Todoリストを管理するアプリ
+このアプリではタスクを日付ごとに追加でき、カレンダーを利用して分かりやすく管理できます。
 
 ## Setup
+このプロジェクトでは「yarn」(https://yarnpkg.com/)を使用して依存関係を管理していますが、「npm」も使用できます。推奨は「yarn」で、以下の手順でセットアップを行ってください。
 
-Make sure to install the dependencies:
-
-```bash
 # npm
 npm install
 

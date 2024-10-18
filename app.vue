@@ -3,19 +3,7 @@
   <div class="flex justify-center items-center h-screen space-y-1">
     <div class="flex space-x-20">
       <Task :tasks="taskList" @addTask="addTask" @updateTask="updateTask" @deleteTask="deleteTask" />
-      <div>
-        <div class="flex justify-between items-center w-full">
-          <h2 class="title mx-auto">Calendar</h2>
-          <UTooltip>
-            <template #text>
-              <span style="color: blue;">●</span> タスクがある日
-              <span style="color: green;">●</span> 今日の日付
-            </template>
-            <UIcon name="i-heroicons-light-bulb" class="w-5 h-5" />
-          </UTooltip>
-        </div>
-        <CalendarComponent :tasks="taskList" />
-      </div>
+      <CalendarComponent :tasks="taskList" />
     </div>
   </div>
   <Footer />
@@ -37,7 +25,7 @@ const getTasks = async () => {
     const response = await fetch('/api/getTasks');
     const data = await response.json();
 
-    //dataチェック
+    // タスクの取得
     if (data.error) {
       console.error(data.error);
     } else {
@@ -69,6 +57,8 @@ const addTask = async (task: { name: string, detail: string, date: Date }) => {
     });
     const data = await response.json();
     console.log(data);
+
+    // タスクの追加
     if (data.error) {
       console.error(data.error);
     } else {
@@ -101,6 +91,8 @@ const updateTask = async (task: { id: number; name: string, detail: string, date
     });
     const data = await response.json();
     console.log(data);
+
+    // タスクの更新
     if (data.error) {
       console.error(data.error);
     } else {
@@ -143,17 +135,6 @@ const deleteTask = async (id: number) => {
   }
 };
 
-// マウント時ににタスクを取得
+// マウント時に全タスクを取得
 onMounted(getTasks);
 </script>
-
-<style scoped>
-.title {
-  font-family: 'Arial', sans-serif;
-  font-size: 20px;
-  font-weight: bold;
-  color: #06a01d;
-  text-align: center;
-  padding: 10px;
-}
-</style>

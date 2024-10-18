@@ -1,0 +1,21 @@
+.title {
+    font-family: 'Arial', sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    color: #040404;
+    text-align: center;
+    padding: 5px;
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.button {
+    max-height: 35px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}

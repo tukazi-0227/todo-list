@@ -1,59 +1,51 @@
 <template>
     <div>
-        <h2 class="title">
-            <div>
+        <!-- Taskコンポーネントのヘッダー -->
+        <header class="header">
+            <h2 class="title">
                 To Do
                 <UButton icon="i-heroicons-pencil-square" size="sm" color="primary" square variant="solid"
-                    @click="toggleVisible" />
-                <UCard v-if="isAddTask || editingTaskIndex !== null" class="task-card">
-                    <div class="space-y-2">
-                        <div class="flex items-center space-x-2">
-                            <UInput v-model="taskName" color="primary" variant="outline" placeholder="タスク"
-                                class="flex-grow" />
-                            <UPopover :popper="{ placement: 'bottom-start' }">
-                                <UButton icon="i-heroicons-calendar-days-20-solid"
-                                    :label="date ? format(date, 'd MMM, yyy') : '選択してください'" />
+                    @click="toggleForm" />
+            </h2>
+        </header>
 
-                                <template #panel="{ close }">
-                                    <DatePicker v-model="date" is-required @select="close()" />
-                                </template>
-                            </UPopover>
-
-                        </div>
-                        <UTextarea v-model="taskText" placeholder="詳細情報" class="additional-textarea" />
-                        <div class="flex justify-end space-x-2">
-                            <UButton size="sm" color="blue" variant="solid" label="保存" :trailing="false"
-                                @click="onSaveTask()" />
-                            <UButton size="sm" color="red" variant="solid" label="キャンセル" :trailing="false"
-                                @click="cancelEdit()" />
-                        </div>
-                    </div>
-                </UCard>
+        <!-- 追加するタスクカードの表示 -->
+        <UCard v-if="isFormVisible" class="task-card">
+            <div class="space-y-2">
+                <div class="flex items-center space-x-2">
+                    <UInput v-model="taskName" color="primary" variant="outline" placeholder="タスク" class="flex-grow" />
+                    <UPopover :popper="{ placement: 'bottom-start' }">
+                        <UButton icon="i-heroicons-calendar-days-20-solid"
+                            :label="date ? format(date, 'd MMM, yyy') : '選択してください'" />
+                        <template #panel="{ close }">
+                            <DatePicker v-model="date" is-required @select="close()" />
+                        </template>
+                    </UPopover>
+                </div>
+                <UTextarea v-model="taskText" placeholder="詳細情報" class="additional-textarea" />
+                <div class="button">
+                    <UButton label="保存" color="blue" @click="saveTask()" />
+                    <UButton label="閉じる" color="red" @click="resetForm()" />
+                </div>
             </div>
-        </h2>
+        </UCard>
+
+        <!-- Todoリスト一覧 -->
         <UCard class="todo-card">
-            <div v-for="(task, index) in formattedTaskList" :key="index" class="flex items-center justify-between mb-4"
-                style="width: 300px" :style="{ borderBottom: '2px solid #ddd', paddingBottom: '10px' }">
+            <div v-for="task in formattedTaskList" :key="task.id" class="task-item">
                 <div>
                     <div class="font-bold">{{ task.name }}</div>
-                    <span v-if="!isTaskDetail[index]" @click="toggleDetail(index)" class="cursor-pointer text-blue-500"
-                        :style="{ fontSize: '13px', textDecoration: 'underline' }">
-                        詳細情報
-                    </span>
-                    <div v-if="isTaskDetail[index]" class="task-detail">
+                    <div v-if="isDetailVisible(task.id)" class="task-detail">
                         {{ task.detail }}
-                        <div>
-                            <span @click="toggleDetail(index)" class="cursor-pointer text-blue-500"
-                                :style="{ fontSize: '13px', textDecoration: 'underline' }">
-                                閉じる
-                            </span>
-                        </div>
                     </div>
-                    <div class="text-sm text-gray-500">{{ task.date }}</div>
+                    <span @click="toggleDetail(task.id)" class="toggle-link">
+                        {{ isDetailVisible(task.id) ? '閉じる' : '詳細情報' }}
+                    </span>
+                    <div class="text-sm text-gray-500">{{ task.formattedDate }}</div>
                 </div>
-                <div class="flex space-x-2">
-                    <UButton size="sm" color="blue" variant="solid" label="更新" @click="editTask(index)" />
-                    <UButton size="sm" color="red" variant="solid" label="完了" @click="onDeleteTask(index)" />
+                <div class="button">
+                    <UButton color="blue" variant="solid" label="更新" @click="editTask(task)" />
+                    <UButton color="red" variant="solid" label="完了" @click="deleteTask(task.id)" />
                 </div>
             </div>
         </UCard>
@@ -65,105 +57,95 @@ import { format } from 'date-fns';
 const date = ref(new Date());
 const taskName = ref('');
 const taskText = ref('');
-const isAddTask = ref(false);
-const isTaskDetail = ref<boolean[]>([]);
-const editingTaskIndex = ref<number | null>(null);
+const isFormVisible = ref(false);
+const editingTaskId = ref<number | null>(null);
+const detailsVisible = ref<Record<number, boolean>>({});
 
-const props = defineProps<{
-    tasks: { id: number; name: string; detail: string; date: Date }[],
-}>();
+// タスクの型定義
+interface Task {
+    id: number;
+    name: string;
+    detail: string;
+    date: Date;
+}
 
+// Props定義
+const props = defineProps<{ tasks: Task[] }>();
+
+// Emits定義
 const emit = defineEmits<{
-    (e: 'addTask', task: { name: string; detail: string; date: Date }): void;
-    (e: 'updateTask', task: { id: number; name: string; detail: string; date: Date }): void;
+    (e: 'addTask', task: Omit<Task, 'id'>): void;
+    (e: 'updateTask', task: Task): void;
     (e: 'deleteTask', id: number): void;
 }>();
 
-const toggleVisible = () => {
-    isAddTask.value = !isAddTask.value;
+// データフォーマット
+const formattedTaskList = computed(() =>
+    props.tasks.map(task => ({
+        ...task,
+        formattedDate: format(new Date(task.date), 'yyyy年MM月dd日'),
+    }))
+);
+
+// 表示・非表示
+const toggleForm = () => {
+    isFormVisible.value = !isFormVisible.value;
+    if (!isFormVisible.value) resetForm();
 }
 
-const toggleDetail = (index: number) => {
-    isTaskDetail.value[index] = !isTaskDetail.value[index];
+const toggleDetail = (id: number) => {
+    detailsVisible.value[id] = !detailsVisible.value[id];
 };
 
-const addTask = () => {
+const isDetailVisible = (id: number) => detailsVisible.value[id];
+
+// 追加or保存メソッド
+const saveTask = () => {
     if (taskName.value === '' || !date.value) {
+        alert("タスク名と日付は必須項目です");
         return;
     }
 
-    emit('addTask', { name: taskName.value, detail: taskText.value, date: new Date(date.value) });
-    taskName.value = '';
-    taskText.value = '';
-    date.value = new Date();
-}
-
-const onDeleteTask = (index: number) => {
-    const task = props.tasks[index];
-    if (task) {
-        emit('deleteTask', task.id);
+    if (editingTaskId.value !== null) {
+        emit('updateTask', {
+            id: editingTaskId.value,
+            name: taskName.value.trim(),
+            detail: taskText.value.trim(),
+            date: date.value,
+        });
+    } else {
+        emit('addTask', {
+            name: taskName.value.trim(),
+            detail: taskText.value.trim(),
+            date: date.value,
+        });
     }
+    resetForm();
 };
 
-const editTask = (index: number) => {
-    const task = props.tasks[index];
-    editingTaskIndex.value = index;
+// 削除メソッド
+const deleteTask = (id: number) => emit('deleteTask', id);
+
+// 更新メソッド
+const editTask = (task: Task) => {
+    editingTaskId.value = task.id;
     taskName.value = task.name;
     taskText.value = task.detail;
     date.value = new Date(task.date);
+    isFormVisible.value = true;
 }
 
-const cancelEdit = () => {
-    editingTaskIndex.value = null;
-
-    isAddTask.value = false;
+// リセットメソッド
+const resetForm = () => {
+    isFormVisible.value = false;
+    editingTaskId.value = null;
     taskName.value = '';
     taskText.value = '';
     date.value = new Date();
-};
-
-const onSaveTask = () => {
-    if (taskName.value === '' || !date.value) {
-        console.log("必須項目です");
-        return;
-    }
-
-    if (editingTaskIndex.value !== null) {
-
-        
-        const task = props.tasks[editingTaskIndex.value];
-        emit('updateTask', { id: task.id, name: taskName.value, detail: taskText.value, date: new Date(date.value) });
-        editingTaskIndex.value = null;
-        console.log("onSaveTaksが動いてます");
-    } else {
-        addTask();
-    }
-
-
-    taskName.value = '';
-    taskText.value = '';
-    date.value = new Date();
-};
-
-const formattedTaskList = computed(() =>
-    (props.tasks || []).map(task => ({
-        name: task.name,
-        detail: task.detail,
-        date: format(new Date(task.date), 'yyyy年MM月dd日')
-    }))
-);
+}
 </script>
 
 <style scoped>
-.title {
-    font-family: 'Arial', sans-serif;
-    font-size: 20px;
-    font-weight: bold;
-    color: #06a01d;
-    text-align: center;
-    padding: 10px;
-}
-
 .todo-card {
     width: 100%;
     height: 300px;
@@ -182,6 +164,22 @@ const formattedTaskList = computed(() =>
     background-color: white;
     border: 1px solid #ccc;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.task-item {
+    width: 300px;
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 15px;
+}
+
+.toggle-link {
+    color: #3b82f6;
+    cursor: pointer;
+    font-size: 13px;
+    text-decoration: underline;
 }
 
 .task-detail {

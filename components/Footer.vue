@@ -1,6 +1,6 @@
 <template>
     <footer class="footer">
-        <p class="footer-text">© 2024 Todoアプリ. All rights reserved.</p>
+        <p class="footer-text">© Todoアプリ. All rights reserved.</p>
     </footer>
 </template>
 

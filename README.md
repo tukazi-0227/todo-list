@@ -11,6 +11,13 @@
 | Prisma         | 5.20.0         |
 | Nuxt.js        | 3.13.0         |
 | better-sqlite3 | 11.4.0        |
+## データベース設計
+| Column           | Type    | Options |
+| -------------- | ------------- | ------------- |
+| id        | Int      | null:false, autoincrement |
+| taskName  | String      | null:false |
+| taskText | String?      | |
+| deadlineDate | String      | null:false |
 ## 機能説明
 | 機能    | 機能説明  |
 | -------------- | ------------- |

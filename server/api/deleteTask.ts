@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { errorMessages } from 'vue/compiler-sfc';
 
 const prisma = new PrismaClient();
 
@@ -17,7 +16,5 @@ export default defineEventHandler(async (event) => {
         return { success: true, task: deletedTask };
     } catch (error) {
         console.error('削除時のエラー:', error);
-        return { error: errorMessages || 'タスクを削除できませんでした' };
     }
-    
 });

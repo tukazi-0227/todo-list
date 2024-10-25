@@ -2,11 +2,11 @@
 このアプリではタスクを日付ごとに追加でき、カレンダーを利用して分かりやすく管理できます。
 
 ## 概要
-このアプリケーションは[Nuxt3](https://nuxt.com/)フレームワーク、[Prisma](https://www.prisma.io/)ORM、[SQLite](https://www.sqlite.org/)をデータベースに使用しています。
+このアプリケーションは[Nuxt3](https://nuxt.com/)フレームワーク、[Firebase](https://firebase.google.com/?hl=ja)フレームワーク、[Firestore](https://firebase.google.com/docs/firestore?hl=ja)をデータベースに使用しています。
 ## 技術仕様
 | 技術           | バージョン    |
 | -------------- | ------------- |
-| Node.js        | 22.8.0      |
+| Node.js        | 20.14.0      |
 | Yarn           | 1.22.22       |
 | Prisma         | 5.20.0         |
 | Nuxt.js        | 3.13.0         |
@@ -41,12 +41,6 @@ git clone https://github.com/tukazi-0227/todo-list.git
 ```bash
 yarn install
 ```
-
-**Prismaのセットアップとマイグレーションの実行**
-```bash
-npx prisma migrate dev --name init
-```
-このコマンドにより、初期マイグレーションが適用され、task.dbという名前のデータベースが作成されます。
 
 **環境構築**
 ```bash

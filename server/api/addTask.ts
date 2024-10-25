@@ -1,22 +1,32 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { defineEventHandler, readBody } from 'h3';
+import { getFirestoreInstance } from '../../plugins/firebaseAdmin';
 
 export default defineEventHandler(async (event) => {
 
     const body = await readBody(event);
 
     try {
-        // タスクの追加
-        const newTask = await prisma.toDo.create({
-            data: {
-                taskName: body.taskName,
-                taskText: body.taskText || '',
-                deadlineDate: body.deadlineDate,
-            },
-        });
+        const db = getFirestoreInstance();
+
+        // タスクのデータ
+        const taskData = {
+            taskName: body.taskName,
+            taskText: body.taskText || '',
+            deadlineDate: body.deadlineDate,
+        };
+       
+        // Firestoreにデータの追加
+        const addTask = await db.collection('toDo').add(taskData);
+
+        // 追加したタスク
+        const newTask = {
+            id: addTask.id,
+            ...taskData,
+        }
+
         return { success: true, task: newTask };
     } catch (error) {
+        console.error(error);
         return { error: 'タスクを追加できませんでした' };
     }
 });

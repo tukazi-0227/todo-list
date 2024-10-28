@@ -1,6 +1,6 @@
 # Todoリストを管理するアプリ
 このアプリではタスクを日付ごとに追加でき、カレンダーを利用して分かりやすく管理できます。
-URL「https://todo-list-rho-opal.vercel.app/」
+**[Todoアプリ(URL)](https://todo-list-rho-opal.vercel.app/)**
 
 ## 概要
 このアプリケーションは[Nuxt3](https://nuxt.com/)フレームワーク、[Firebase](https://firebase.google.com/?hl=ja)フレームワーク、[Firestore](https://firebase.google.com/docs/firestore?hl=ja)をデータベースに使用しています。

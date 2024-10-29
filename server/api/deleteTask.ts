@@ -1,5 +1,5 @@
 import { defineEventHandler } from 'h3';
-import { getFirestoreInstance } from '../../plugins/firebaseAdmin';
+import { getFirestoreInstance } from '../../plugins/firebaseAdmin.server';
 
 export default defineEventHandler(async (event) => {
 

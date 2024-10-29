@@ -6,6 +6,7 @@ export default defineNuxtConfig({
   css: ['@/assets/css/global.css'],
   modules: ['@nuxt/ui'],
   runtimeConfig: {
+    // クライアントサイド環境変数
     public: {
       firebaseApiKey: process.env.FIREBASE_API_KEY,
       firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -15,5 +16,7 @@ export default defineNuxtConfig({
       firebaseAppId: process.env.FIREBASE_APP_ID,
       firebaseMeasurementId: process.env.FIREBASE_MEASUREMENT_ID,
     },
+    // サーバーサイド環境変数
+    firebaseServiceAccountKey: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
   }
 })

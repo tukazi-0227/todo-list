@@ -1,5 +1,4 @@
 import { initializeApp, cert, getApps, type App } from 'firebase-admin/app';
-
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 
 let firebaseAdminApp: App;

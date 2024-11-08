@@ -4,12 +4,12 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   const { user } = useAuth();
 
   // 認証が必要なページかを確認
-  if (to.meta.requiresAuth && !user) {
+  if (to.meta.requiresAuth && !user.value) {
     return navigateTo('/login');
   }
 
   // 認証を保持している場合
-  if ((to.path === '/login') && user) {
+  if ((to.path === '/login') && user.value) {
     return navigateTo('/');
   }
 });

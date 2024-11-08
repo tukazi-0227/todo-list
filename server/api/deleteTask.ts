@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
         const db = getFirestoreInstance();
 
         const body = await readBody(event);
+        const userId = body.userId;
         const id = body.id;
 
         if (!id) {
@@ -14,15 +15,14 @@ export default defineEventHandler(async (event) => {
         }
 
         // タスクの存在確認
-        const taskRef = db.collection('toDo').doc(id);
-        const taskDoc = await taskRef.get();
+        const taskDocRef = db.collection('users').doc(userId).collection('toDo').doc(id);
 
-        if (!taskDoc.exists) {
+        if (!taskDocRef) {
             throw createError({ statusCode: 404, statusMessage: 'タスクが見つかりませんでした' });
         }
 
         // タスクの削除
-        await taskRef.delete();
+        await taskDocRef.delete();
 
         return { success: true, id };
     } catch (error) {

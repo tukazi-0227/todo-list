@@ -1,20 +1,25 @@
 import { defineEventHandler } from 'h3';
 import { getFirestoreInstance } from '../../plugins/firebaseAdmin.server';
+import { DocumentData, QuerySnapshot } from 'firebase-admin/firestore';
 
+interface QueryParams {
+    userId: string;
+}
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
     try {
         const db = getFirestoreInstance();
 
-        
-        const taskRef = db.collection('toDo');
-        const taskSnapshot = await taskRef.get();
+        const { userId } = getQuery(event) as QueryParams;
+
+        const taskRef = db.collection('users').doc(userId).collection('toDo');
+        const taskSnapshot: QuerySnapshot<DocumentData> = await taskRef.get();
 
         // 全タスクの取得
         const tasks = taskSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        return tasks;
+        return {success: true, tasks};
     } catch (error) {
-        return { error: 'タスクを取得できませんでした'};
+        return { error: 'タスクを取得できませんでした' };
     }
 });

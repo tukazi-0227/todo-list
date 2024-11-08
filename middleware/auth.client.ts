@@ -1,9 +1,7 @@
 import { defineNuxtRouteMiddleware, navigateTo } from '#imports';
-import { getAuth } from 'firebase/auth';
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  const auth = getAuth();
-  const user = auth.currentUser;
+  const { user } = useAuth();
 
   // 認証が必要なページかを確認
   if (to.meta.requiresAuth && !user) {

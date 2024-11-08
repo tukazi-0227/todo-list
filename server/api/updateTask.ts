@@ -12,16 +12,16 @@ export default defineEventHandler(async (event) => {
         if (!id) {
             throw createError({ statusCode: 400, statusMessage: 'タスクIDが指定されていません' });
         }
-        const taskRef = db.collection('toDo').doc(id);
+        const taskDocRef = db.collection('users').doc(body.userId).collection('toDo').doc(id);
 
         // タスクの更新
-        await taskRef.update({
+        await taskDocRef.update({
             taskName: body.taskName,
             taskText: body.taskText || '',
             deadlineDate: body.deadlineDate,
         });
 
-        const updatedDoc = await taskRef.get();
+        const updatedDoc = await taskDocRef.get();
 
         const updatedTask = {
             id: updatedDoc.id,

@@ -15,14 +15,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import type { User } from 'firebase/auth';
 
 const route = useRoute();
 const hiddenPages = ['/login'];
-const isMenuVisible = ref(false);
-const user = inject('user') as Ref<User | null>;
+const isMenuVisible = ref<boolean>(false);
 
 // メニュー自体の表示非表示
 const isButtonHidden = computed(() => {
@@ -34,12 +32,6 @@ const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
 }
 
-// メニューバーの初期化
-watch(user, (newUser, oldUser) => {
-  if (newUser !== oldUser) {
-    isMenuVisible.value = false;
-  }
-});
 </script>
 
 <style scoped>

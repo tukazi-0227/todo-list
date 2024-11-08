@@ -1,28 +1,27 @@
 <template>
-  <!-- メニューバーの中身 -->
-  <ul class="navigation-menu">
-    <li v-for="link in links" :key="link.label">
-      <component :is="link.to ? 'NuxtLink' : 'button'" v-bind="link.to ? { to: link.to } : {}"
-        @click="handleClick(link)" class="navigation-link">
-        <i :class="link.icon"></i>
-        {{ link.label }}
-      </component>
-    </li>
-  </ul>
+  <!-- メニューバー -->
+  <div @click="toggleMenuLink">
+    <ul v-if="!isMenuLinkVisible" class="navigation-menu">
+      <li v-for="link in links" :key="link.label">
+        <component :is="link.to ? 'NuxtLink' : 'button'" v-bind="link.to ? { to: link.to } : {}"
+          @click="handleClick(link)" class="navigation-link">
+          <i :class="link.icon"></i>
+          {{ link.label }}
+        </component>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { inject } from 'vue';
 import { getAuth, signOut } from 'firebase/auth';
 import { useRouter } from 'vue-router';
-import type { User } from 'firebase/auth';
 import type { VerticalNavigationLink } from '~/types/navigation';
 
 // ユーザー情報とログイン情報を取得
-const user = inject('user') as Ref<User | null>;
-const loading = inject('loading') as Ref<boolean>;
-
+const { user } = useAuth();
 const router = useRouter();
+const isMenuLinkVisible = ref<boolean>(false);
 
 // ログアウト処理
 const logout = async () => {
@@ -44,7 +43,7 @@ const links = computed<VerticalNavigationLink[]>(() => {
     }
   ];
 
-  if (user.value) {
+  if (user) {
     baseLinks.push({
       label: 'ログアウト',
       icon: 'i-heroicons-home',
@@ -60,6 +59,16 @@ const handleClick = (link: VerticalNavigationLink) => {
     link.onClick();
   }
 };
+
+// メニューリンクの表示非表示
+const toggleMenuLink = () => {
+  isMenuLinkVisible.value = !isMenuLinkVisible.value;
+}
+
+// メニューリンクの初期化
+onMounted(() => {
+  isMenuLinkVisible.value = false;
+});
 </script>
 
 <style scoped>

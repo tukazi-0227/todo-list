@@ -9,8 +9,7 @@
 
 <script setup lang="ts">
 
-definePageMeta ({
-  middleware: 'auth-client',
+definePageMeta({
   requiresAuth: true,
 });
 
@@ -20,23 +19,29 @@ import 'v-calendar/dist/style.css';
 import { onMounted, ref } from 'vue';
 
 const taskList = ref<{ id: number; name: string; detail: string; date: Date }[]>([]);
+const { user, loading, initFirebaseAuth } = useAuth();
+// uidの取得
+const userId = ref<string>("");
 
 // 全タスクを取得するapi関数
-const getTasks = async () => {
+const getTasks = async (userId: string) => {
   try {
-    const response = await fetch('/api/getTasks');
+    const response = await fetch(`/api/getTasks?userId=${encodeURIComponent(userId)}`, {
+      method: 'GET',
+    });
     const data = await response.json();
 
     // タスクの取得
     if (data.error) {
       console.error(data.error);
-    } else {
-      taskList.value = data.map((task: { id: number, taskName: string, taskText: string, deadlineDate: string }) => ({
+    } else if (data.tasks) {
+      taskList.value = data.tasks.map((task: { id: number, taskName: string, taskText: string, deadlineDate: string }) => ({
         id: task.id,
         name: task.taskName,
         detail: task.taskText,
         date: new Date(task.deadlineDate)
       }));
+      console.log(data);
     }
   } catch (error) {
     console.error('タスクの取得に失敗しました', error);
@@ -52,6 +57,7 @@ const addTask = async (task: { name: string, detail: string, date: Date }) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        userId: userId.value,
         taskName: task.name,
         taskText: task.detail,
         deadlineDate: task.date.toISOString().split('T')[0],
@@ -85,6 +91,7 @@ const updateTask = async (task: { id: number; name: string, detail: string, date
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        userId: userId.value,
         id: task.id,
         taskName: task.name,
         taskText: task.detail,
@@ -121,7 +128,7 @@ const deleteTask = async (id: number) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ id, userId: userId.value }),
     });
 
     const data = await response.json();
@@ -138,5 +145,10 @@ const deleteTask = async (id: number) => {
 };
 
 // マウント時に全タスクを取得
-onMounted(getTasks);
+onMounted(async () => {
+  // todo認証処理
+  const user: any = await initFirebaseAuth();
+  userId.value = user.uid
+  getTasks(userId.value);
+});
 </script>

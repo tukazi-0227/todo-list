@@ -5,13 +5,19 @@ export function useAuth() {
   const user = ref<User | null>(null);
   const loading = ref<boolean>(true);
 
-  onMounted(() => {
+  const initFirebaseAuth = () => {
     const auth = getAuth();
-    onAuthStateChanged(auth, (currentUser) => {
-      user.value = currentUser;
-      loading.value = false;
-    });
-  });
+    return new Promise((resolve) => {
 
-  return { user, loading };
+      onAuthStateChanged(auth, (currentUser) => {
+          // ログインしていれば中通る
+          console.log(currentUser)
+          debugger;
+          resolve(currentUser)
+      });
+
+    })
+  }
+
+  return { user, loading, initFirebaseAuth };
 }

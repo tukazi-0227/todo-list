@@ -144,10 +144,13 @@ const deleteTask = async (id: number) => {
   }
 };
 
-// マウント時に全タスクを取得
+// マウント時に認証、全タスクを取得
 onMounted(async () => {
   // todo認証処理
   const user: any = await initFirebaseAuth();
+  if (!user) {
+    return navigateTo('/login');
+  }
   userId.value = user.uid
   getTasks(userId.value);
 });

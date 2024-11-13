@@ -1,0 +1,25 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 認証があるかの確認
+    function isAuthenticated() {
+    	return request.auth != null;
+    }
+    
+    // 認証&userIdが一致しているかの確認
+    function isUserAuthenticated(userId) {
+    	return isAuthenticated() && userId == request.auth.uid;
+    }
+    
+    // ルール本文
+    match /users/{userId} {
+      allow get, create: if isUserAuthenticated(userId);
+      
+      match /toDo/{taskId} {
+      	allow read, create, update, delete: if isUserAuthenticated(userId);
+      }
+    }
+  }
+}
